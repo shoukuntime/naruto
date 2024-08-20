@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zn-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ウルトラマン クイズ</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            background-color: rgb(245, 174, 222);
+            display: block;
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <img src="https://one-uni-static.oneone.com.tw/upload/featured/05281c16f3eeecf0e791ce7d79a8dbb9.jpg" height="300px">
+    <div style="font-size: 24px;font-family:Microsoft YaHei" ;>火影忍者問答大挑戰</div>
+    <div class="describe">請輸入答題題數(1~100)</div>
+    <input type="number" id="number" style="width:50px;"><button id="number" onclick="confirm()">確認</button>
+    <a href="test.html">題庫</a>
+    <div id="quiz"></div>
+
+</body>
+
+<script>
+    let i = 0;
+    let correct = 0;  // 初始化 correct
+    let quiz_numbers = [];
+    let answer;
+
+    function confirm() {
+        i = 0;  // 重置 i
+        correct = 0;  // 重置 correct
+        quiz_numbers = [];  // 清空 quiz_numbers 陣列
+        let number = numberEl.value;
+        let count = 0;
+
+        while (count < number) {  // 修正條件
+            let n = getRandomInt(0, 699);
+            if (!quiz_numbers.includes(n)) {
+                quiz_numbers.push(n);
+                count += 1;
+            }
+        }
+
+        loadQuiz();  // 加載第一個問題
+    }
+
+    function loadQuiz() {
+        d3.csv('火影忍者問答題庫.csv').then(function (data) {
+            let d = data[quiz_numbers[i]];
+            answer = d["答案"];
+            displayQuiz(d, i);
+        });
+    }
+
+    function displayQuiz(d, index) {
+        quizEl.innerHTML = `<div class="question">Q${index + 1}. ${d['題目']}</div>`;
+        ["A", "B", "C", "D"].forEach((option, idx) => {
+            quizEl.innerHTML += `<button id="choose" onclick="${option === answer ? 'Y()' : 'N()'}()">${option}. ${d[option]}</button><br>`;
+        });
+    }
+
+    function next() {
+        let number = numberEl.value;
+        if (i < number - 1) {
+            i += 1;
+            loadQuiz();
+        } else {
+            quizEl.innerHTML = `結束<br>分數: ${correct}/${number}`;
+
+        }
+    }
+
+    function Y() {
+        correct += 1;
+        quizEl.innerHTML = `<div style="color:green;">答對了</div>
+        <button onclick="next()">下一題</button>`;
+    }
+
+    function N() {
+        quizEl.innerHTML = `<div style="color:red;">答錯了</div>
+        <button onclick="next()">下一題</button>`;
+    }
+
+    const numberEl = document.querySelector("#number");
+    const quizEl = document.querySelector("#quiz");
+
+    function getRandomInt(start, end) {
+        return Math.floor(Math.random() * (end - start + 1)) + start;
+    }
+</script>
+
+</html>
